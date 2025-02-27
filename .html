@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Магазин кроссовок у Самира</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      background-color: #f5f5f5;
+    }
+
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .cart {
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .cart:hover {
+      transform: scale(1.1);
+    }
+
+    .products-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      padding: 2rem;
+    }
+
+    .product {
+      background: white;
+      border-radius: 10px;
+      padding: 1rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .product:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .product img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .product h2 {
+      margin: 1rem 0;
+      color: #333;
+    }
+
+    .product p {
+      color: #666;
+      margin-bottom: 1rem;
+    }
+
+    .price {
+      color: #e74c3c;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin: 0.5rem 0;
+    }
+
+    .old-price {
+      text-decoration: line-through;
+      color: #999;
+      font-size: 0.9rem;
+      margin-left: 0.5rem;
+    }
+
+    .add-to-cart {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      width: 100%;
+    }
+
+    .add-to-cart:hover {
+      background: #219a52;
+    }
+
+    .sale-badge {
+      background: #e74c3c;
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 0.9rem;
+    }
+
+    .size-selector {
+      margin: 1rem 0;
+    }
+
+    .size-btn {
+      background: #ecf0f1;
+      border: none;
+      padding: 0.5rem;
+      margin: 0.2rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .size-btn:hover {
+      background: #bdc3c7;
+    }
+
+    .cart-sidebar {
+      position: fixed;
+      top: 0;
+      right: -400px;
+      width: 400px;
+      height: 100%;
+      background: white;
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+      transition: right 0.3s ease;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .cart-sidebar.active {
+      right: 0;
+    }
+
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .close-cart {
+      cursor: pointer;
+      font-size: 1.5rem;
+    }
+
+    .cart-items {
+      margin-bottom: 2rem;
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .cart-item img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      margin-right: 10px;
+      border-radius: 8px;
+    }
+
+    .total-price {
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: right;
+      margin-top: 1rem;
+    }
+
+    .checkout-btn {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 1rem;
+      width: 100%;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    .checkout-btn:hover {
+      background: #219a52;
+    }
+
+    @media (max-width: 768px) {
+      .cart-sidebar {
+        width: 100%;
+        right: -100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Магазин кроссовок</h1>
+    <div class="cart">
+      <i class="fas fa-shopping-cart"></i>
+      <span id="cart-count">0</span>
+    </div>
+  </header>
+
+  <div class="products-container">
+    <!-- Первая группа карточек -->
+    <div class="product">
+        <div class="sale-badge">-20%</div>
+        <img src="https://avatars.mds.yandex.net/i?id=99aea14a5abe510d2b99a524d62c51af1c62bbf6-5570459-images-thumbs&n=13" alt="Nike Air Max 270">
+        <h2>Nike Air Max 270</h2>
+        <ul class="product-specs">
+            <li>🍃 Воздушная подошва</li>
+            <li>⚖️ Вес: 320 г</li>
+            <li>🧵 Материал: сетка/кожа</li>
+            <li>🎨 Цвета: 8 вариантов</li>
+        </ul>
+        <div class="size-selector">
+            <button class="size-btn">38</button>
+            <button class="size-btn">39</button>
+            <button class="size-btn">40</button>
+            <button class="size-btn">41</button>
+        </div>
+        <p class="price">12 999 ₽ <span class="old-price">15 999 ₽</span></p>
+        <button class="add-to-cart" data-id="1" data-name="Nike Air Max 270" data-price="12999">В корзину</button>
+    </div>
+
+    <div class="product">
+        <img src="adidas-ultraboost.jpg" alt="Adidas Ultraboost 22">
+        <h2>Adidas Ultraboost 22</h2>
+        <ul class="product-specs">
+            <li>🚀 Технология Boost</li>
+            <li>⚖️ Вес: 280 г</li>
+            <li>🧵 Материал: Primeknit</li>
+            <li>🎨 Эксклюзивная расцветка</li>
+        </ul>
+        <div class="size-selector">
+            <button class="size-btn">39</button>
+            <button class="size-btn">40</button>
+            <button class="size-btn">41</button>
+            <button class="size-btn">42</button>
+        </div>
+        <p class="price">14 499 ₽</p>
+        <button class="add-to-cart" data-id="2" data-name="Adidas Ultraboost 22" data-price="14499">В корзину</button>
+    </div>
+
+    <!-- Вторая группа карточек (теперь внутри products-container) -->
+    <div class="product">
+        <div class="sale-badge">-20%</div>
+        <img src="https://avatars.mds.yandex.net/i?id=d98282f1ab006f761bfaf91d8512de838b4d9ac7c51c9b3b-10504219-images-thumbs&n=13" alt="Nike Air Force 1">
+        <h2>Nike Air Force 1</h2>
+        <ul class="product-specs">
+            <li>🌳 Классический стиль</li>
+            <li>⚖️ Вес: 350 г</li>
+            <li>🧵 Материал: кожа</li>
+            <li>🎨 Цвета: 10 вариантов</li>
+        </ul>
+        <div class="size-selector">
+            <button class="size-btn">38</button>
+            <button class="size-btn">39</button>
+            <button class="size-btn">40</button>
+            <button class="size-btn">41</button>
+        </div>
+        <p class="price">11 999 ₽ <span class="old-price">14 999 ₽</span></p>
+        <button class="add-to-cart" data-id="5" data-name="Nike Air Force 1" data-price="11999">В корзину</button>
+    </div>
+
+    <div class="product">
+        <div class="sale-badge">-15%</div>
+        <img src="https://avatars.mds.yandex.net/i?id=dd533908bf0f30f8113f59086cfd43a6871b7848-4555484-images-thumbs&n=13" alt="Adidas NMD R1">
+        <h2>Adidas NMD R1</h2>
+        <ul class="product-specs">
+            <li>🌈 Удобная подошва Boost</li>
+            <li>⚖️ Вес: 290 г</li>
+            <li>🧵 Материал: текстиль/синтетика</li>
+            <li>🎨 Цвета: 6 вариантов</li>
+        </ul>
+        <div class="size-selector">
+            <button class="size-btn">40</button>
+            <button class="size-btn">41</button>
+            <button class="size-btn">42</button>
+            <button class="size-btn">43</button>
+        </div>
+        <p class="price">13 499 ₽ <span class="old-price">15 999 ₽</span></p>
+        <button class="add-to-cart" data-id="6" data-name="Adidas NMD R1" data-price="13499">В корзину</button>
+    </div>
+</div> <!-- Закрываем .products-container -->
+
+<div class="products-container">
+    <!-- Первая группа карточек -->
+    <div class="product">
+        <div class="sale-badge">-20%</div>
+        <img src="https://avatars.mds.yandex.net/i?id=c63726c649c6a40f1cc6f9d37c773b0b-4805050-images-thumbs&n=13" alt="Nike Air Max 270">
+        <h2>Yeezy Boost 350 (2015)</h2>
+        <ul class="product-specs">
+            <li>🍃 Воздушная подошва</li>
+            <li>⚖️ Вес: 320 г</li>
+            <li>🧵 Материал: сетка/кожа</li>
+            <li>🎨 Цвета: 8 вариантов</li>
+        </ul>
+        <div class="size-selector">
+            <button class="size-btn">38</button>
+            <button class="size-btn">39</button>
+            <button class="size-btn">40</button>
+            <button class="size-btn">41</button>
+        </div>
+        <p class="price">12 999 ₽ <span class="old-price">15 999 ₽</span></p>
+        <button class="add-to-cart" data-id="1" data-name="Nike Air Max 270" data-price="12999">В корзину</button>
+    </div>
+
+    <div class="product">
+        <img src="https://avatars.mds.yandex.net/i?id=5c77bfa2e15352b23f6f3e48a61361a140466f722965ba7d-5146837-images-thumbs&n=13" alt="Adidas Ultraboost 22">
+        <h2>Puma Ignite (2015)</h2>
+        <ul class="product-specs">
+            <li>🚀 Технология Boost</li>
+            <li>⚖️ Вес: 280 г</li>
+            <li>🧵 Материал: Primeknit</li>
+            <li>🎨 Эксклюзивная расцветка</li>
+        </ul>
+        <div class="size-selector">
+            <button class="size-btn">39</button>
+            <button class="size-btn">40</button>
+            <button class="size-btn">41</button>
+            <button class="size-btn">42</button>
+        </div>
+        <p class="price">19 999 ₽</p>
+        <button class="add-to-cart" data-id="2" data-name="Adidas Ultraboost 22" data-price="14499">В корзину</button>
+    </div>
+
+    <!-- Вторая группа карточек (теперь внутри products-container) -->
+    <div class="product">
+        <div class="sale-badge">-50%</div>
+        <img src="https://avatars.mds.yandex.net/i?id=34e30a13f6a87c91729fceb703622b9aa93fb152-8744112-images-thumbs&n=13" alt="Nike Air Force 1">
+        <h2>Adidas UltraBoost (2015)</h2>
+        <ul class="product-specs">
+            <li>🌳 Классический стиль</li>
+            <li>⚖️ Вес: 350 г</li>
+            <li>🧵 Материал: кожа</li>
+            <li>🎨 Цвета: 10 вариантов</li>
+        </ul>
+        <div class="size-selector">
+            <button class="size-btn">38</button>
+            <button class="size-btn">39</button>
+            <button class="size-btn">40</button>
+            <button class="size-btn">41</button>
+        </div>
+        <p class="price">17 999 ₽ <span class="old-price">14 999 ₽</span></p>
+        <button class="add-to-cart" data-id="5" data-name="Nike Air Force 1" data-price="11999">В корзину</button>
+    </div>
+
+    <div class="product">
+        <div class="sale-badge">-10%</div>
+        <img src="https://avatars.mds.yandex.net/i?id=b48ebc3cc65855630aa3d483d20ecbf57f57e813-12840527-images-thumbs&n=13">
+        <h2>Nike Roshe Run (2012)</h2>
+        <ul class="product-specs">
+            <li>🌈 Удобная подошва Boost</li>
+            <li>⚖️ Вес: 290 г</li>
+            <li>🧵 Материал: текстиль/синтетика</li>
+            <li>🎨 Цвета: 6 вариантов</li>
+        </ul>
+        <div class="size-selector">
+            <button class="size-btn">40</button>
+            <button class="size-btn">41</button>
+            <button class="size-btn">42</button>
+            <button class="size-btn">43</button>
+        </div>
+        <p class="price">6000 ₽ <span class="old-price">15 999 ₽</span></p>
+        <button class="add-to-cart" data-id="6" data-name="Adidas NMD R1" data-price="13499">В корзину</button>
+    </div>
+</div> <!-- Закрываем .products-container -->
+
+<!-- Блок корзины (оставляем вне .products-container) -->
+<div class="cart-sidebar">
+    <div class="cart-header">
+        <h2>Ваша корзина</h2>
+        <span class="close-cart">&times;</span>
+    </div>
+    <div class="cart-items"></div>
+    <div class="total-price">Итого: 0 ₽</div>
+    <button class="checkout-btn">Оформить заказ</button>
+</div>
+
+<div class="products-container">
+    <!-- Первая группа карточек -->
+    <div class="product">
+        <div class="sale-badge">-15%</div>
+        <img src="https://avatars.mds.yandex.net/i?id=788c5c0f2f3526933fa6c0c2e5a3bc50ef2a1657-5261734-images-thumbs&n=13" alt="Nike Air VaporMax 2017">
+        <h2>Nike Air VaporMax 2017</h2>
+        <ul class="product-specs">
+            <li>💨 Инновационная подошва VaporMax</li>
+            <li>⚖️ Вес: 300 г</li>
+            <li>🧵 Материал: Flyknit</li>
+            <li>🎨 Цвета: 12 вариантов</li>
+        </ul>
+        <div class="size-selector">
+            <button class="size-btn">39</button>
+            <button class="size-btn">40</button>
+            <button class="size-btn">41</button>
+            <button class="size-btn">42</button>
+        </div>
+        <p class="price">17 999 ₽ <span class="old-price">20 999 ₽</span></p>
+        <button class="add-to-cart" data-id="1" data-name="Nike Air VaporMax 2017" data-price="17999">В корзину</button>
+    </div>
+
+    <div class="product">
+        <img src="https://avatars.mds.yandex.net/i?id=efd27520cee4380e35f7210d0ba0d2cf-5218109-images-thumbs&n=13" alt="Adidas NMD R1 Primeknit 2016">
+        <h2>Adidas NMD R1 Primeknit 2016</h2>
+        <ul class="product-specs">
+            <li>🚀 Технология Boost</li>
+            <li>⚖️ Вес: 290 г</li>
+            <li>🧵 Материал: Primeknit</li>
+            <li>🎨 Цвета: 8 вариантов</li>
+        </ul>
+        <div class="size-selector">
+            <button class="size-btn">40</button>
+            <button class="size-btn">41</button>
+            <button class="size-btn">42</button>
+            <button class="size-btn">43</button>
+        </div>
+        <p class="price">15 499 ₽</p>
+        <button class="add-to-cart" data-id="2" data-name="Adidas NMD R1 Primeknit 2016" data-price="15499">В корзину</button>
+    </div>
+
+    <!-- Вторая группа карточек -->
+    <div class="product">
+        <div class="sale-badge">-20%</div>
+        <img src="https://avatars.mds.yandex.net/i?id=f72792bd451f782c385d8d04a701e204ed7ceb10-9193117-images-thumbs&n=13" alt="Puma RS-X 2018">
+        <h2>Puma RS-X 2018</h2>
+        <ul class="product-specs">
+            <li>🌈 Яркий дизайн в стиле ретро</li>
+            <li>⚖️ Вес: 320 г</li>
+            <li>🧵 Материал: текстиль/синтетика</li>
+            <li>🎨 Цвета: 10 вариантов</li>
+        </ul>
+        <div class="size-selector">
+            <button class="size-btn">38</button>
+            <button class="size-btn">39</button>
+            <button class="size-btn">40</button>
+            <button class="size-btn">41</button>
+        </div>
+        <p class="price">12 999 ₽ <span class="old-price">15 999 ₽</span></p>
+        <button class="add-to-cart" data-id="3" data-name="Puma RS-X 2018" data-price="12999">В корзину</button>
+    </div>
+
+    <div class="product">
+        <div class="sale-badge">-10%</div>
+        <img src="https://avatars.mds.yandex.net/i?id=78f3b56574f17c3f641811f7dd24e2afa31d3041-8249876-images-thumbs&n=13" alt="Reebok Classic Leather 2019">
+        <h2>Reebok Classic Leather 2019</h2>
+        <ul class="product-specs">
+            <li>👟 Классический дизайн</li>
+            <li>⚖️ Вес: 310 г</li>
+            <li>🧵 Материал: кожа</li>
+            <li>🎨 Цвета: 6 вариантов</li>
+        </ul>
+        <div class="size-selector">
+            <button class="size-btn">39</button>
+            <button class="size-btn">40</button>
+            <button class="size-btn">41</button>
+            <button class="size-btn">42</button>
+        </div>
+        <p class="price">9 999 ₽ <span class="old-price">11 999 ₽</span></p>
+        <button class="add-to-cart" data-id="4" data-name="Reebok Classic Leather 2019" data-price="9999">В корзину</button>
+    </div>
+
+    <!-- Третья группа карточек -->
+    <div class="product">
+        <div class="sale-badge">-25%</div>
+        <img src="https://avatars.mds.yandex.net/i?id=c88aeb5b2e82c59aa13cd4e66a443bd90d6fb3812e4b8274-11402271-images-thumbs&n=13" alt="New Balance 997H 2020">
+        <h2>New Balance 997H 2020</h2>
+        <ul class="product-specs">
+            <li>🌟 Современный ретро-стиль</li>
+            <li>⚖️ Вес: 330 г</li>
+            <li>🧵 Материал: текстиль/кожа</li>
+            <li>🎨 Цвета: 7 вариантов</li>
+        </ul>
+        <div class="size-selector">
+            <button class="size-btn">40</button>
+            <button class="size-btn">41</button>
+            <button class="size-btn">42</button>
+            <button class="size-btn">43</button>
+        </div>
+        <p class="price">14 999 ₽ <span class="old-price">19 999 ₽</span></p>
+        <button class="add-to-cart" data-id="5" data-name="New Balance 997H 2020" data-price="14999">В корзину</button>
+    </div>
+
+    <div class="product">
+        <img src="https://avatars.mds.yandex.net/i?id=2a0000017a1946a2c25a936eb805bcc03947-5070325-images-thumbs&n=13" alt="Asics Gel-Kayano 26 2019">
+        <h2>Asics Gel-Kayano 26 2019</h2>
+        <ul class="product-specs">
+            <li>🏃‍♂️ Технология Gel для амортизации</li>
+            <li>⚖️ Вес: 340 г</li>
+            <li>🧵 Материал: синтетика/сетка</li>
+            <li>🎨 Цвета: 5 вариантов</li>
+        </ul>
+        <div class="size-selector">
+            <button class="size-btn">41</button>
+            <button class="size-btn">42</button>
+            <button class="size-btn">43</button>
+            <button class="size-btn">44</button>
+        </div>
+        <p class="price">16 499 ₽</p>
+        <button class="add-to-cart" data-id="6" data-name="Asics Gel-Kayano 26 2019" data-price="16499">В корзину</button>
+    </div>
+</div> <!-- Закрываем .products-container -->
+
+
+  <script>
+    let cart = [];
+    const cartSidebar = document.querySelector('.cart-sidebar');
+    const cartCount = document.querySelector('#cart-count');
+    const cartItemsContainer = document.querySelector('.cart-items');
+    const totalPriceElement = document.querySelector('.total-price');
+
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+      button.addEventListener('click', () => {
+        const product = {
+          id: button.dataset.id,
+          name: button.dataset.name,
+          price: parseInt(button.dataset.price),
+          quantity: 1
+        };
+
+        const existingItem = cart.find(item => item.id === product.id);
+        if (existingItem) {
+          existingItem.quantity++;
+        } else {
+          cart.push(product);
+        }
+
+        updateCart();
+        cartSidebar.classList.add('active');
+        animateCartIcon();
+      });
+    });
+
+    document.querySelector('.cart').addEventListener('click', () => {
+      cartSidebar.classList.toggle('active');
+    });
+
+    document.querySelector('.close-cart').addEventListener('click', () => {
+      cartSidebar.classList.remove('active');
+    });
+
+    function updateCart() {
+      cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+      cartItemsContainer.innerHTML = cart.map(item => `
+        <div class="cart-item">
+          <img src="${document.querySelector(`[data-id="${item.id}"] img`).src}" alt="${item.name}">
+          <div>
+            <h3>${item.name}</h3>
+            <p>${item.price} ₽ x ${item.quantity}</p>
+          </div>
+        </div>
+      `).join('');
+
+      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      totalPriceElement.textContent = `Итого: ${total.toLocaleString()} ₽`;
+    }
+
+    function animateCartIcon() {
+      const cartIcon = document.querySelector('.cart');
+      cartIcon.style.transform = 'scale(1.2)';
+      setTimeout(() => cartIcon.style.transform = 'scale(1)', 300);
+    }
+  </script>
+</body>
+</html>
